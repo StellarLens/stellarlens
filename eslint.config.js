@@ -12,5 +12,16 @@ export default tseslint.config(
     rules: {
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }]
     }
+  },
+  {
+    files: ["**/*.config.js", "**/*.config.cjs"],
+    languageOptions: {
+      globals: {
+        module: "writable",
+        require: "readonly",
+        process: "readonly",
+        __dirname: "readonly"
+      }
+    }
   }
 );
