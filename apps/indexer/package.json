@@ -7,12 +7,19 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -b",
-    "dev": "tsc -b --watch",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "echo \"no tests yet\" && exit 0"
   },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^17.0.1",
+    "dotenv": "^17.4.2"
+  },
   "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.7.0"
   }
 }
