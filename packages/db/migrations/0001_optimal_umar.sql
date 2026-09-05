@@ -1,0 +1,1 @@
+ALTER TABLE "indexer_checkpoints" ALTER COLUMN "cursor" SET DATA TYPE text;

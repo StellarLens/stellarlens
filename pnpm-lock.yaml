@@ -60,9 +60,15 @@ importers:
       '@stellar/stellar-sdk':
         specifier: ^17.0.1
         version: 17.0.1
+      '@stellarlens/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
+      drizzle-orm:
+        specifier: ^0.45.2
+        version: 0.45.2(postgres@3.4.9)
     devDependencies:
       '@types/node':
         specifier: ^20.0.0

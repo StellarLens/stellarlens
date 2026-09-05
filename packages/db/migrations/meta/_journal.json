@@ -8,6 +8,13 @@
       "when": 1788639140446,
       "tag": "0000_greedy_doctor_spectrum",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788640375406,
+      "tag": "0001_optimal_umar",
+      "breakpoints": true
     }
   ]
 }

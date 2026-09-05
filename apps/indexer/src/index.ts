@@ -1,29 +1,26 @@
-import "dotenv/config";
 import { rpc } from "@stellar/stellar-sdk";
+import { createDb } from "@stellarlens/db";
+import { POLL_INTERVAL_MS, SOROBAN_RPC_URL } from "./config.js";
+import { processEventsBatch } from "./events.js";
 
-const SOROBAN_RPC_URL = process.env.SOROBAN_RPC_URL;
-
-if (!SOROBAN_RPC_URL) {
-  throw new Error("SOROBAN_RPC_URL environment variable is required");
-}
-
-const POLL_INTERVAL_MS = 5000;
-
-const server = new rpc.Server(SOROBAN_RPC_URL);
-
-async function pollLatestLedger() {
-  const { sequence } = await server.getLatestLedger();
-  console.log(`latest ledger: ${sequence}`);
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function main() {
+  const server = new rpc.Server(SOROBAN_RPC_URL);
+  const db = createDb();
+
   for (;;) {
     try {
-      await pollLatestLedger();
+      const count = await processEventsBatch(db, server);
+      if (count > 0) {
+        console.log(`indexed ${count} event(s)`);
+      }
     } catch (err) {
-      console.error("failed to fetch latest ledger:", err);
+      console.error("failed to process events batch:", err);
     }
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    await sleep(POLL_INTERVAL_MS);
   }
 }
 
