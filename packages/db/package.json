@@ -9,6 +9,7 @@
     "build": "tsc -b",
     "dev": "tsc -b --watch",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "test": "echo \"no tests yet\" && exit 0",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
