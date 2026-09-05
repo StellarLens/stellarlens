@@ -1,0 +1,63 @@
+name: Bug report
+description: Something isn't working the way it should
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! You don't need to fill
+        out every field perfectly — just give us enough to reproduce the
+        problem, and we'll help take it from there.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: Tell us what you saw
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: false
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: How can we see this ourselves?
+      placeholder: |
+        1. Run '...'
+        2. Then '...'
+        3. See error
+    validations:
+      required: false
+
+  - type: input
+    id: package
+    attributes:
+      label: Which app or package is affected?
+      description: e.g. apps/api, apps/web, packages/db
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, pnpm version, browser (if relevant), etc.
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Logs, screenshots, or other context. Feel free to leave this blank.
+    validations:
+      required: false
