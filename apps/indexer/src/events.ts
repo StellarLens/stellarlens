@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import type { rpc } from "@stellar/stellar-sdk";
 import { contracts, events as eventsTable, indexerCheckpoints, type Database } from "@stellarlens/db";
 import { EVENTS_BATCH_LIMIT, STELLAR_NETWORK } from "./config.js";
+import { decodeScVal } from "./decode.js";
 import { withRetry } from "./retry.js";
 
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
@@ -37,27 +38,34 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
         limit: EVENTS_BATCH_LIMIT
       };
 
-  const response = await withRetry("getEvents", () => server.getEvents(request));
+  const response = await withRetry("getEvents", () => server._getEvents(request));
 
   await db.transaction(async (tx) => {
     for (const event of response.events) {
-      if (!event.contractId) {
-        continue;
-      }
+      const contractId = await resolveContractId(tx, event.contractId);
 
-      const contractId = await resolveContractId(tx, event.contractId.contractId());
+      const rawTopic = event.topic ?? [];
+      const decodedTopic = rawTopic.map(decodeScVal);
+      const decodedValue = decodeScVal(event.value);
 
       await tx.insert(eventsTable).values({
         contractId,
         ledger: event.ledger,
         txHash: event.txHash,
-        topic: JSON.stringify(event.topic),
+        topic: JSON.stringify(rawTopic),
         decodedData: {
           id: event.id,
           type: event.type,
-          value: event.value,
           ledgerClosedAt: event.ledgerClosedAt,
-          inSuccessfulContractCall: event.inSuccessfulContractCall
+          inSuccessfulContractCall: event.inSuccessfulContractCall,
+          raw: {
+            topic: rawTopic,
+            value: event.value
+          },
+          decoded: {
+            topic: decodedTopic,
+            value: decodedValue
+          }
         }
       });
     }
