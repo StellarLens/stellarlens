@@ -1,8 +1,15 @@
 import { eq } from "drizzle-orm";
 import type { rpc } from "@stellar/stellar-sdk";
-import { contracts, events as eventsTable, indexerCheckpoints, type Database } from "@stellarlens/db";
+import {
+  contracts,
+  events as eventsTable,
+  indexerCheckpoints,
+  tokenTransfers,
+  type Database
+} from "@stellarlens/db";
 import { EVENTS_BATCH_LIMIT, STELLAR_NETWORK } from "./config.js";
 import { decodeScVal } from "./decode.js";
+import { detectTransfer } from "./transfers.js";
 import { withRetry } from "./retry.js";
 
 type Tx = Parameters<Parameters<Database["transaction"]>[0]>[0];
@@ -68,6 +75,19 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
           }
         }
       });
+
+      const transfer = detectTransfer(decodedTopic, decodedValue);
+      if (transfer) {
+        await tx.insert(tokenTransfers).values({
+          contractId,
+          from: transfer.from,
+          to: transfer.to,
+          amount: transfer.amount,
+          asset: event.contractId,
+          txHash: event.txHash,
+          ledger: event.ledger
+        });
+      }
     }
 
     await tx
