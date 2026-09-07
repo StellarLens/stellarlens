@@ -10,6 +10,7 @@ function requireEnv(name: string): string {
 
 export const SOROBAN_RPC_URL = requireEnv("SOROBAN_RPC_URL");
 export const STELLAR_NETWORK = requireEnv("STELLAR_NETWORK");
+export const REGISTRY_PORT = Number(process.env.REGISTRY_PORT ?? 3002);
 export const POLL_INTERVAL_MS = 5000;
 export const EVENTS_BATCH_LIMIT = 100;
 export const MAX_RETRIES = 5;
