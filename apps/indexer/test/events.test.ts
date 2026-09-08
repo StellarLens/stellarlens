@@ -47,6 +47,17 @@ function makeServer(): rpc.Server {
   return new rpc.Server(TEST_RPC_URL, { allowHttp: true });
 }
 
+function buildLatestLedger(sequence: number) {
+  return {
+    id: "abc",
+    sequence,
+    protocolVersion: "21",
+    closeTime: "0",
+    headerXdr: "AAAAAA==",
+    metadataXdr: "AAAAAA=="
+  };
+}
+
 describe("processEventsBatch", () => {
   it("advances the checkpoint across polls and resumes from the stored cursor", async () => {
     const db = getTestDb();
@@ -72,7 +83,7 @@ describe("processEventsBatch", () => {
 
     mswServer.use(
       mockJsonRpc({
-        getLatestLedger: () => ({ id: "abc", sequence: 1000, protocolVersion: 21 }),
+        getLatestLedger: () => buildLatestLedger(1000),
         getEvents: getEventsSpy
       })
     );
@@ -107,7 +118,7 @@ describe("processEventsBatch", () => {
 
     mswServer.use(
       mockJsonRpc({
-        getLatestLedger: () => ({ id: "abc", sequence: 2000, protocolVersion: 21 }),
+        getLatestLedger: () => buildLatestLedger(2000),
         getEvents: () => ({
           events: [
             buildRawEvent({
@@ -151,7 +162,7 @@ describe("processEventsBatch", () => {
 
     mswServer.use(
       mockJsonRpc({
-        getLatestLedger: () => ({ id: "abc", sequence: 3000, protocolVersion: 21 }),
+        getLatestLedger: () => buildLatestLedger(3000),
         getEvents: () => ({
           events: [
             buildRawEvent({
@@ -191,7 +202,7 @@ describe("processEventsBatch", () => {
 
     mswServer.use(
       mockJsonRpc({
-        getLatestLedger: () => ({ id: "abc", sequence: 4000, protocolVersion: 21 }),
+        getLatestLedger: () => buildLatestLedger(4000),
         getEvents: () => ({
           events: [
             buildRawEvent({ contractId: "CONTRACT_UNREGISTERED", topic: [symbolXdr("fee")] }),

@@ -27,7 +27,7 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
     ? { filters: [{ type: "contract" as const }], cursor, limit: EVENTS_BATCH_LIMIT }
     : {
         filters: [{ type: "contract" as const }],
-        startLedger: (await withRetry("getLatestLedger", () => server.getLatestLedger())).sequence,
+        startLedger: (await withRetry("getLatestLedger", () => server._getLatestLedger())).sequence,
         limit: EVENTS_BATCH_LIMIT
       };
 
