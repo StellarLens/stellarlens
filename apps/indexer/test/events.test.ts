@@ -87,8 +87,11 @@ describe("processEventsBatch", () => {
     await processEventsBatch(db, server);
 
     expect(firstEventsSpy).toHaveBeenCalledTimes(1);
-    const firstCallParams = firstEventsSpy.mock.calls[0][0] as { cursor?: string; startLedger?: number };
-    expect(firstCallParams.cursor).toBeUndefined();
+    const firstCallParams = firstEventsSpy.mock.calls[0][0] as {
+      pagination?: { cursor?: string };
+      startLedger?: number;
+    };
+    expect(firstCallParams.pagination?.cursor).toBeUndefined();
     expect(firstCallParams.startLedger).toBe(1000);
 
     const [afterFirst] = await db
@@ -110,8 +113,8 @@ describe("processEventsBatch", () => {
 
     // the second call must resume from the stored cursor, not re-derive startLedger
     expect(secondEventsSpy).toHaveBeenCalledTimes(1);
-    const secondCallParams = secondEventsSpy.mock.calls[0][0] as { cursor?: string };
-    expect(secondCallParams.cursor).toBe("CURSOR_1");
+    const secondCallParams = secondEventsSpy.mock.calls[0][0] as { pagination?: { cursor?: string } };
+    expect(secondCallParams.pagination?.cursor).toBe("CURSOR_1");
 
     const [afterSecond] = await db
       .select({ cursor: indexerCheckpoints.cursor })

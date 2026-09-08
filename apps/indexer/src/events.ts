@@ -22,7 +22,6 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
   }
 
   const cursor = await getStoredCursor(db);
-  console.error("[debug] network=", JSON.stringify(STELLAR_NETWORK), "cursor=", JSON.stringify(cursor));
 
   const request = cursor
     ? { filters: [{ type: "contract" as const }], cursor, limit: EVENTS_BATCH_LIMIT }
@@ -91,7 +90,6 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
         set: { cursor: response.cursor }
       });
   });
-  console.error("[debug] wrote checkpoint cursor=", JSON.stringify(response.cursor));
 
   return indexedCount;
 }
