@@ -63,28 +63,22 @@ describe("processEventsBatch", () => {
     const db = getTestDb();
     await registerContract(db, { address: "CONTRACT_A", network: NETWORK });
 
-    const getEventsSpy = vi.fn((params: unknown) => {
-      const p = params as { cursor?: string; startLedger?: number };
-      if (p.cursor === "CURSOR_1") {
-        return { events: [], cursor: "CURSOR_2", latestLedger: 1010 };
-      }
-      return {
-        events: [
-          buildRawEvent({
-            contractId: "CONTRACT_A",
-            topic: [symbolXdr("fee")],
-            value: i128Xdr(-100n)
-          })
-        ],
-        cursor: "CURSOR_1",
-        latestLedger: 1005
-      };
-    });
+    const firstEventsSpy = vi.fn((_params: unknown) => ({
+      events: [
+        buildRawEvent({
+          contractId: "CONTRACT_A",
+          topic: [symbolXdr("fee")],
+          value: i128Xdr(-100n)
+        })
+      ],
+      cursor: "CURSOR_1",
+      latestLedger: 1005
+    }));
 
     mswServer.use(
       mockJsonRpc({
         getLatestLedger: () => buildLatestLedger(1000),
-        getEvents: getEventsSpy
+        getEvents: firstEventsSpy
       })
     );
 
@@ -92,24 +86,38 @@ describe("processEventsBatch", () => {
 
     await processEventsBatch(db, server);
 
+    expect(firstEventsSpy).toHaveBeenCalledTimes(1);
+    const firstCallParams = firstEventsSpy.mock.calls[0][0] as { cursor?: string; startLedger?: number };
+    expect(firstCallParams.cursor).toBeUndefined();
+    expect(firstCallParams.startLedger).toBe(1000);
+
     const [afterFirst] = await db
       .select({ cursor: indexerCheckpoints.cursor })
       .from(indexerCheckpoints)
       .where(eq(indexerCheckpoints.network, NETWORK));
     expect(afterFirst?.cursor).toBe("CURSOR_1");
 
+    const secondEventsSpy = vi.fn((_params: unknown) => ({ events: [], cursor: "CURSOR_2", latestLedger: 1010 }));
+
+    mswServer.use(
+      mockJsonRpc({
+        getLatestLedger: () => buildLatestLedger(1000),
+        getEvents: secondEventsSpy
+      })
+    );
+
     await processEventsBatch(db, server);
+
+    // the second call must resume from the stored cursor, not re-derive startLedger
+    expect(secondEventsSpy).toHaveBeenCalledTimes(1);
+    const secondCallParams = secondEventsSpy.mock.calls[0][0] as { cursor?: string };
+    expect(secondCallParams.cursor).toBe("CURSOR_1");
 
     const [afterSecond] = await db
       .select({ cursor: indexerCheckpoints.cursor })
       .from(indexerCheckpoints)
       .where(eq(indexerCheckpoints.network, NETWORK));
     expect(afterSecond?.cursor).toBe("CURSOR_2");
-
-    // the second call must resume from the stored cursor, not re-derive startLedger
-    expect(getEventsSpy).toHaveBeenCalledTimes(2);
-    const secondCallParams = getEventsSpy.mock.calls[1][0] as { cursor?: string };
-    expect(secondCallParams.cursor).toBe("CURSOR_1");
   });
 
   it("decodes event topic and value XDR into native values alongside the raw form", async () => {
