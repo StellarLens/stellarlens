@@ -1,4 +1,4 @@
-import { bigint, bigserial, index, integer, numeric, pgTable, text } from "drizzle-orm/pg-core";
+import { bigint, bigserial, index, integer, numeric, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { contracts } from "./contracts.js";
 
 export const tokenTransfers = pgTable(
@@ -13,7 +13,8 @@ export const tokenTransfers = pgTable(
     amount: numeric("amount").notNull(),
     asset: text("asset").notNull(),
     txHash: text("tx_hash").notNull(),
-    ledger: bigint("ledger", { mode: "number" }).notNull()
+    ledger: bigint("ledger", { mode: "number" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull()
   },
   (table) => [
     index("token_transfers_contract_id_idx").on(table.contractId),

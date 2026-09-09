@@ -15,6 +15,13 @@
       "when": 1788640375406,
       "tag": "0001_optimal_umar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788912820911,
+      "tag": "0002_gigantic_tempest",
+      "breakpoints": true
     }
   ]
 }
