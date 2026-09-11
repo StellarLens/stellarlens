@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { AddContractForm } from "../../components/AddContractForm";
 import { listContracts } from "../../lib/api";
 
@@ -22,7 +23,11 @@ export default async function ContractsPage() {
         <tbody>
           {contracts.map((contract) => (
             <tr key={contract.id} className="border-b border-gray-100">
-              <td className="py-2 font-mono text-xs">{contract.address}</td>
+              <td className="py-2 font-mono text-xs">
+                <Link href={`/contracts/${contract.id}`} className="hover:underline">
+                  {contract.address}
+                </Link>
+              </td>
               <td className="py-2">{contract.name ?? "—"}</td>
               <td className="py-2">{contract.network}</td>
             </tr>
