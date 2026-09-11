@@ -5,9 +5,10 @@ import { DatabaseModule } from "./database/database.module";
 import { EventsModule } from "./events/events.module";
 import { HealthController } from "./health.controller";
 import { TransfersModule } from "./transfers/transfers.module";
+import { WebhooksModule } from "./webhooks/webhooks.module";
 
 @Module({
-  imports: [DatabaseModule, AuthModule, ContractsModule, EventsModule, TransfersModule],
+  imports: [DatabaseModule, AuthModule, ContractsModule, EventsModule, TransfersModule, WebhooksModule],
   controllers: [HealthController]
 })
 export class AppModule {}

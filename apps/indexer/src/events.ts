@@ -6,6 +6,7 @@ import { decodeScVal } from "./decode.js";
 import { loadRegisteredContracts } from "./registry.js";
 import { detectTransfer } from "./transfers.js";
 import { withRetry } from "./retry.js";
+import { deliverWebhooksForEvent, type WebhookEventPayload } from "./webhooks.js";
 
 async function getStoredCursor(db: Database): Promise<string | undefined> {
   const [row] = await db
@@ -34,6 +35,7 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
   const response = await withRetry("getEvents", () => server._getEvents(request));
 
   let indexedCount = 0;
+  const webhookPayloads: WebhookEventPayload[] = [];
 
   await db.transaction(async (tx) => {
     for (const event of response.events) {
@@ -47,25 +49,37 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
       const decodedTopic = rawTopic.map(decodeScVal);
       const decodedValue = decodeScVal(event.value);
 
-      await tx.insert(eventsTable).values({
+      const [insertedEvent] = await tx
+        .insert(eventsTable)
+        .values({
+          contractId,
+          ledger: event.ledger,
+          txHash: event.txHash,
+          topic: JSON.stringify(rawTopic),
+          decodedData: {
+            id: event.id,
+            type: event.type,
+            ledgerClosedAt: event.ledgerClosedAt,
+            inSuccessfulContractCall: event.inSuccessfulContractCall,
+            raw: {
+              topic: rawTopic,
+              value: event.value
+            },
+            decoded: {
+              topic: decodedTopic,
+              value: decodedValue
+            }
+          }
+        })
+        .returning({ id: eventsTable.id });
+
+      webhookPayloads.push({
+        eventId: insertedEvent.id,
         contractId,
         ledger: event.ledger,
         txHash: event.txHash,
-        topic: JSON.stringify(rawTopic),
-        decodedData: {
-          id: event.id,
-          type: event.type,
-          ledgerClosedAt: event.ledgerClosedAt,
-          inSuccessfulContractCall: event.inSuccessfulContractCall,
-          raw: {
-            topic: rawTopic,
-            value: event.value
-          },
-          decoded: {
-            topic: decodedTopic,
-            value: decodedValue
-          }
-        }
+        topic: decodedTopic,
+        value: decodedValue
       });
 
       const transfer = detectTransfer(decodedTopic, decodedValue);
@@ -90,6 +104,10 @@ export async function processEventsBatch(db: Database, server: rpc.Server): Prom
         set: { cursor: response.cursor }
       });
   });
+
+  for (const payload of webhookPayloads) {
+    await deliverWebhooksForEvent(db, payload);
+  }
 
   return indexedCount;
 }

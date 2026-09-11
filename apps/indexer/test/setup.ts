@@ -21,7 +21,7 @@ beforeAll(async () => {
 
 afterEach(async () => {
   await db.execute(
-    sql`TRUNCATE TABLE token_transfers, events, indexer_checkpoints, contracts RESTART IDENTITY CASCADE`
+    sql`TRUNCATE TABLE token_transfers, events, indexer_checkpoints, webhooks, contracts RESTART IDENTITY CASCADE`
   );
   mswServer.resetHandlers();
 });

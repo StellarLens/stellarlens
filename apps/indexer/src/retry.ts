@@ -4,7 +4,17 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function withRetry<T>(label: string, fn: () => Promise<T>): Promise<T> {
+export interface RetryOptions {
+  maxRetries?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+}
+
+export async function withRetry<T>(label: string, fn: () => Promise<T>, options?: RetryOptions): Promise<T> {
+  const maxRetries = options?.maxRetries ?? MAX_RETRIES;
+  const baseDelayMs = options?.baseDelayMs ?? RETRY_BASE_DELAY_MS;
+  const maxDelayMs = options?.maxDelayMs ?? RETRY_MAX_DELAY_MS;
+
   let attempt = 0;
 
   for (;;) {
@@ -12,14 +22,11 @@ export async function withRetry<T>(label: string, fn: () => Promise<T>): Promise
       return await fn();
     } catch (err) {
       attempt += 1;
-      if (attempt > MAX_RETRIES) {
+      if (attempt > maxRetries) {
         throw err;
       }
-      const delay = Math.min(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1), RETRY_MAX_DELAY_MS);
-      console.error(
-        `${label} failed (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delay}ms:`,
-        err
-      );
+      const delay = Math.min(baseDelayMs * 2 ** (attempt - 1), maxDelayMs);
+      console.error(`${label} failed (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms:`, err);
       await sleep(delay);
     }
   }
