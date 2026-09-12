@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createContract } from "../../lib/api";
+import { createContract } from "@/lib/api";
 
 export async function addContract(formData: FormData): Promise<void> {
   const address = String(formData.get("address") ?? "").trim();

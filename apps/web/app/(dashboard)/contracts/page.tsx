@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { AddContractForm } from "../../components/AddContractForm";
-import { listContracts } from "../../lib/api";
+import { AddContractForm } from "@/components/AddContractForm";
+import { listContracts } from "@/lib/api";
 
 export default async function ContractsPage() {
   const contracts = await listContracts();

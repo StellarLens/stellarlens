@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { logout } from "@/app/(dashboard)/actions";
 
 const NAV_ITEMS = [
   { href: "/contracts", label: "Contracts" },
@@ -33,6 +34,12 @@ export function Sidebar() {
           );
         })}
       </ul>
+
+      <form action={logout} className="mt-6 border-t border-gray-200 pt-4">
+        <button type="submit" className="w-full rounded px-3 py-2 text-left text-sm text-gray-500 hover:bg-gray-100">
+          Sign out
+        </button>
+      </form>
     </nav>
   );
 }

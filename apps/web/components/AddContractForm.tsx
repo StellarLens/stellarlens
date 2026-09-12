@@ -1,4 +1,4 @@
-import { addContract } from "../app/contracts/actions";
+import { addContract } from "@/app/(dashboard)/contracts/actions";
 
 export function AddContractForm() {
   return (

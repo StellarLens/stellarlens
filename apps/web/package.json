@@ -8,9 +8,12 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"no tests yet\" && exit 0"
+    "test": "echo \"no tests yet\" && exit 0",
+    "create-user": "tsx scripts/create-user.ts"
   },
   "dependencies": {
+    "@stellarlens/db": "workspace:*",
+    "drizzle-orm": "^0.45.2",
     "next": "^14.2.35",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
@@ -21,8 +24,10 @@
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.0",
+    "dotenv": "^17.4.2",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
+    "tsx": "^4.23.13",
     "typescript": "^5.7.0"
   }
 }
