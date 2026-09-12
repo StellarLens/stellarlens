@@ -70,6 +70,17 @@ export interface ListTransfersParams {
   limit?: number;
 }
 
+export interface ApiKeyRow {
+  id: number;
+  name: string | null;
+  createdAt: string;
+  revokedAt: string | null;
+}
+
+export interface GeneratedApiKey extends ApiKeyRow {
+  key: string;
+}
+
 export class ApiNotFoundError extends Error {}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -90,6 +101,10 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   if (!response.ok) {
     const body = await response.text();
     throw new Error(`api request to ${path} failed with ${response.status}: ${body}`);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
   }
 
   return response.json() as Promise<T>;
@@ -136,4 +151,19 @@ export function listTransfers(contractId: number, params?: ListTransfersParams):
   }
   const qs = query.toString();
   return apiFetch<TransfersPage>(`/contracts/${contractId}/transfers${qs ? `?${qs}` : ""}`);
+}
+
+export function listApiKeys(): Promise<ApiKeyRow[]> {
+  return apiFetch<ApiKeyRow[]>("/api-keys");
+}
+
+export function generateApiKey(input: { name?: string }): Promise<GeneratedApiKey> {
+  return apiFetch<GeneratedApiKey>("/api-keys", {
+    method: "POST",
+    body: JSON.stringify(input)
+  });
+}
+
+export function revokeApiKey(id: number): Promise<void> {
+  return apiFetch<void>(`/api-keys/${id}`, { method: "DELETE" });
 }
