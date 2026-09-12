@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EventsTable } from "@/components/EventsTable";
 import { StatsCards } from "@/components/StatsCards";
@@ -29,6 +30,13 @@ export default async function ContractDetailPage({ params }: { params: { id: str
       </div>
 
       <StatsCards stats={stats} />
+
+      <Link
+        href={`/contracts/${contractId}/transfers`}
+        className="inline-block text-sm font-medium text-gray-700 hover:underline"
+      >
+        View transfers →
+      </Link>
 
       <div>
         <h2 className="mb-3 text-lg font-semibold">Events</h2>

@@ -48,6 +48,28 @@ export interface ListEventsParams {
   limit?: number;
 }
 
+export interface TransferRow {
+  id: number;
+  contractId: number;
+  from: string;
+  to: string;
+  amount: string;
+  asset: string;
+  txHash: string;
+  ledger: number;
+  createdAt: string;
+}
+
+export interface TransfersPage {
+  data: TransferRow[];
+  nextCursor: number | null;
+}
+
+export interface ListTransfersParams {
+  cursor?: number;
+  limit?: number;
+}
+
 export class ApiNotFoundError extends Error {}
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -102,4 +124,16 @@ export function listEvents(contractId: number, params?: ListEventsParams): Promi
   }
   const qs = query.toString();
   return apiFetch<EventsPage>(`/contracts/${contractId}/events${qs ? `?${qs}` : ""}`);
+}
+
+export function listTransfers(contractId: number, params?: ListTransfersParams): Promise<TransfersPage> {
+  const query = new URLSearchParams();
+  if (params?.cursor !== undefined) {
+    query.set("cursor", String(params.cursor));
+  }
+  if (params?.limit !== undefined) {
+    query.set("limit", String(params.limit));
+  }
+  const qs = query.toString();
+  return apiFetch<TransfersPage>(`/contracts/${contractId}/transfers${qs ? `?${qs}` : ""}`);
 }
